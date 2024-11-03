@@ -17,7 +17,7 @@
 # Go into the BASH SHELL and type crontab -e that will open your cron jobs in the text editor NANO. Create a CRON job for the file to run.
 # 
 # 00 0 * * 5 /usr/local/bin/backup.to.usb.sh
-# This CRON job will run at 12:00 AM every Friday. Adjust for your needs.
+# This CRON job will run at midnight every Friday. Adjust for your needs.
 # The first 2 numbers are for minutes. The second set of numbers is the hour. Third * change if you want to make it run on a certain day of the month.
 # options are 1 to 31 allowed values. Fourth * change if you want to make it run on a certain month 1 to 12 are the allowed values. The fifth 5 change if you want to make it run on a different # # day of the week 0 being Sunday and 6 being Saturday.
 # It will check the USB drive and delete the oldest backups always leaving the last 2 backups.
@@ -40,7 +40,7 @@ fi
 
 BACKUP_SOURCES=($backup_sources)
 USB_MOUNT_POINT=$usb_mount_point
-LOG_DIR=$log_dir
+LOG_DIR="$USB_MOUNT_POINT/backup_logs"
 RETAIN_BACKUPS=$retain_backups
 
 
@@ -76,45 +76,8 @@ backup() {
     echo "Backup complete" | tee -a "$LOG_FILE"
 
 
-    find "$LOG_DIR" -name "backup_log_*.txt" -type f | sort | head -n -2 | xargs -r rm --
+    find "$LOG_DIR" -name "backup_log_*.txt" -type f | sort | head -n -4 | xargs -r rm --
 }
 
 
-restore() {
-
-    LATEST_BACKUP=$(ls -t "$USB_MOUNT_POINT"/"${HOSTNAME}"_backup_*.zip | head -n 1)
-
-    if [ -z "$LATEST_BACKUP" ]; then
-        echo "Error: No backup file found on USB for hostname $HOSTNAME." | tee -a "$LOG_FILE"
-        exit 1
-    fi
-
-    echo "Restoring from latest backup: $LATEST_BACKUP..." | tee -a "$LOG_FILE"
-    sudo unzip -o "$LATEST_BACKUP" -d / &>> "$LOG_FILE"
-
-    if [ $? -eq 0 ]; then
-        echo "Restore successful" | tee -a "$LOG_FILE"
-    else
-        echo "Restore failed" | tee -a "$LOG_FILE"
-        exit 1
-    fi
-
-    echo "Restore complete" | tee -a "$LOG_FILE"
-
-
-    find "$LOG_DIR" -name "backup_log_*.txt" -type f | sort | head -n -2 | xargs -r rm --
-}
-
-
-case "$1" in
-    backup)
-        backup
-        ;;
-    restore)
-        restore
-        ;;
-    *)
-        echo "Usage: $0 {backup|restore}"
-        exit 1
-        ;;
-esac
+backup
