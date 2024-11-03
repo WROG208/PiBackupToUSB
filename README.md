@@ -2,6 +2,7 @@
 
 ## Note: Please insert a USB drive before starting the installation. The script will save a backup of all necessary files to the USB drive as a precaution. In case of a system failure, this backup allows you to restore the files directly to the Pi without needing to reinstall the repository. During the restore process, the files will be copied back to the Pi with the correct permissions set automatically. 
 
+## This is NOT intended for ASL3. It was not tested. So use at your own risk.
  
 
 
