@@ -8,7 +8,7 @@
 
 ## Installation Steps
 
-### Step 1: Clone the Repository
+### Step 1: Download the zip file 
 
 Open a terminal on your Raspberry Pi and run the following command to clone the repository it will save it to `/tmp/PiBackupSystem` creating the PiBackupSystem directory:
 
