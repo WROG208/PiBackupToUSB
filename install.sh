@@ -1,6 +1,12 @@
 #!/bin/bash
 
-# Install Script for Backup System on Raspberry Pi
+# Install and Restore Script for Backup System on Raspberry Pi
+# This script will install essential files and dependencies 
+# Backup/Restore to USB thumb drive.
+# 11/2/2024
+# Created By WROG208 \ N4ASS
+# www.lonewolfsystem.org
+# Files being copied to the Pi. backup_to_usb.sh backup_config.conf and setting permissions for the files as well as adding a CRON job for the script  # to run every week.
 
 
 TARGET_DIR="/usr/local/bin"
@@ -17,55 +23,24 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 
+echo "Installing necessary packages..."
 if ! command -v dos2unix &> /dev/null; then
-    echo "Installing dos2unix for line ending conversion..."
     pacman -Sy --noconfirm dos2unix
+fi
+if ! command -v zip &> /dev/null || ! command -v unzip &> /dev/null; then
+    pacman -Sy --noconfirm zip unzip
 fi
 
 
 convert_to_unix() {
-    for file in backup_to_usb.sh setup.sh backup_config.conf; do
+    for file in backup_to_usb.sh backup_config.conf; do
         if file "$file" | grep -q "CRLF"; then
             echo "Converting $file to Unix (LF) line endings..."
             dos2unix "$file"
         fi
     done
 }
-
-
 convert_to_unix
-
-
-if [ ! -d "$USB_MOUNT_POINT" ]; then
-    echo "Creating USB mount point at $USB_MOUNT_POINT..."
-    mkdir -p "$USB_MOUNT_POINT"
-fi
-
-
-if mount | grep -q "$USB_MOUNT_POINT"; then
-    echo "USB drive is already mounted at $USB_MOUNT_POINT."
-else
-
-    echo "USB drive not mounted. Attempting to mount at $USB_MOUNT_POINT..."
-    mount "$USB_DEVICE" "$USB_MOUNT_POINT"
-    
-
-    if [ $? -eq 0 ]; then
-        echo "USB drive successfully mounted at $USB_MOUNT_POINT."
-    else
-        echo "Error: Unable to mount USB drive. Proceeding without USB backup."
-    fi
-fi
-
-
-if mount | grep -q "$USB_MOUNT_POINT"; then
-    echo "Creating a backup copy of files on the USB drive..."
-    USB_BACKUP_DIR="$USB_MOUNT_POINT/BackupFiles"
-    mkdir -p "$USB_BACKUP_DIR"
-    cp backup_to_usb.sh setup.sh backup_config.conf "$USB_BACKUP_DIR/"
-else
-    echo "Warning: No USB drive detected or mount failed. Essential files will not be backed up to USB."
-fi
 
 
 echo "Creating log directory at $LOG_DIR..."
@@ -74,19 +49,44 @@ mkdir -p "$LOG_DIR"
 
 echo "Copying files..."
 cp backup_to_usb.sh "$TARGET_DIR/"
-cp setup.sh "$TARGET_DIR/"
 cp backup_config.conf "$CONFIG_DIR/"
 
 
 echo "Setting permissions..."
 chmod +x "$TARGET_DIR/backup_to_usb.sh"
-chmod +x "$TARGET_DIR/setup.sh"
 chmod 644 "$CONFIG_DIR/backup_config.conf"
 
 
-echo "Installing necessary packages..."
-if ! command -v zip &> /dev/null || ! command -v unzip &> /dev/null; then
-    pacman -Sy --noconfirm zip unzip
+if [ ! -d "$USB_MOUNT_POINT" ]; then
+    echo "Creating USB mount point at $USB_MOUNT_POINT..."
+    mkdir -p "$USB_MOUNT_POINT"
+fi
+
+
+if ! mount | grep -q "$USB_MOUNT_POINT"; then
+    echo "Attempting to mount USB drive at $USB_MOUNT_POINT..."
+    mount "$USB_DEVICE" "$USB_MOUNT_POINT" || echo "Failed to mount USB drive."
+fi
+
+
+LATEST_BACKUP=$(ls -t "$USB_MOUNT_POINT"/*_backup_*.zip 2>/dev/null | head -n 1)
+if [ -n "$LATEST_BACKUP" ]; then
+    echo "Backup found on USB drive: $LATEST_BACKUP"
+    read -p "Do you want to restore from this backup? (y/n): " confirm
+    if [[ "$confirm" =~ ^[Yy]$ ]]; then
+        echo "Restoring from $LATEST_BACKUP..."
+        unzip -o "$LATEST_BACKUP" -d /
+        if [ $? -eq 0 ]; then
+            echo "Restore successful."
+        else
+            echo "Restore failed."
+            exit 1
+        fi
+    else
+        echo "Restore skipped by user."
+    fi
+else
+    echo "No backup file found on USB."
 fi
 
 
