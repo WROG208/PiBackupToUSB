@@ -42,17 +42,31 @@ After the script completes, you can verify that the setup was successful by chec
 
 To update the project with the latest changes from GitHub.
 
-Navigate to the repository directory on your Raspberry Pi:
+### How the Update Process Works
+
+## Checks for Repository:
+   If the repository isn’t cloned locally, it will clone it to /tmp/PiBackupSystem.
+   If the repository is already present, it pulls the latest changes from GitHub.
+
+## Copies Updated Scripts to the System:
+   Copies backup_to_usb.sh, restore_from_usb.sh, and backup_config.conf to /usr/local/bin.
+   Sets the necessary permissions to ensure the scripts can execute and the configuration file is readable.
+
+## Updates USB Backup:
+   If the USB drive is mounted, it copies the updated scripts to the USB drive.
+   If the USB drive isn’t mounted, it skips the USB backup update but completes the update on the Pi.
+
+## Usage Instructions
+Run the update_scripts.sh Script whenever you want to apply the latest changes from the GitHub repository:
+
 ```bash
-cd /tmp/PiBackupSystem
+sudo /path/to/update_scripts.sh
 ```
 
-### Pull the latest changes:
-```bash
-git pull
-```
+## Automate Updates: 
+Optionally, you can set up a cron job to run update_scripts.sh at regular intervals (e.g., weekly) if you want to automate the update process.
 
-### Re-run the install script if needed:
+This approach keeps the scripts on both the Pi and the USB drive up to date with the latest repository changes, ensuring that you always have the most recent version.
+
 ```bash
-sudo ./install.sh
-```
+
