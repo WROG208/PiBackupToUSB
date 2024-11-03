@@ -9,27 +9,19 @@
 ## Installation Steps
 
 ### Step 1: Download the zip file 
+Click on the green code button and choose Download ZIP
 
-Open a terminal on your Raspberry Pi and run the following command to clone the repository it will save it to `/tmp/PiBackupSystem` creating the PiBackupSystem directory:
-
-```bash
-git clone https://WROG208@github.com/PiBackupSystem.git /tmp/PiBackupSystem
+### Step 2: Unzip and copy the contents of the zip file to the Pi
+Look for a folder named tmp and create a folder there named PiBackupToUSB and paste all the files there.
 ```
-
-### Step 2: Navigate to the Repository Directory
-Once cloned, navigate into the repository directory:
-
-```bash
-cd /tmp/PiBackupSystem
+PiBackupToUSB
 ```
-
 
 ### Step 3: Set the executable permission for install.sh:
 
 ```bash
 sudo chmod +x install.sh
 ```
-
 
 ### Step 4: Run the install.sh. This script will copy files to the appropriate directories, set permissions, and configure the environment.
 
@@ -56,35 +48,4 @@ Look for this line. If the line is there then the crontab has been set. (This is
 ```
 
 
-### Updating the Project
-
-To update the project with the latest changes from GitHub.
-
-### How the Update Process Works
-
-## Checks for Repository:
-   If the repository isn’t cloned locally, it will clone it to /tmp/PiBackupSystem.
-   If the repository is already present, it pulls the latest changes from GitHub.
-
-## Copies Updated Scripts to the System:
-   Copies backup_to_usb.sh, restore_from_usb.sh, and backup_config.conf to /usr/local/bin.
-   Sets the necessary permissions to ensure the scripts can execute and the configuration file is readable.
-
-## Updates USB Backup:
-   If the USB drive is mounted, it copies the updated scripts to the USB drive.
-   If the USB drive isn’t mounted, it skips the USB backup update but completes the update on the Pi.
-
-## Usage Instructions
-Run the update_scripts.sh Script whenever you want to apply the latest changes from the GitHub repository:
-
-```bash
-sudo /path/to/update_scripts.sh
-```
-
-## Automate Updates: 
-Optionally, you can set up a cron job to run update_scripts.sh at regular intervals (e.g., weekly) if you want to automate the update process.
-
-This approach keeps the scripts on both the Pi and the USB drive up to date with the latest repository changes, ensuring that you always have the most recent version.
-
-```bash
-
+For some reason I cant get GitHub to allow cloning when I figure it out I will update this.
