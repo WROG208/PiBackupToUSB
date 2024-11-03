@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Install and Restore Script for Backup System on Raspberry Pi
-# This script will install essential files and dependencies 
-# Backup/Restore to USB thumb drive.
-# 11/2/2024
+# Backup/Restore to USB thumb drive Script
+# Install and Restore Script for Backup to USB drive on Raspberry Pi
+# This script will install essential files and dependencies as well as make a backup of files to the USB drive and finally run the first backup once installed 
+# 11/03/2024
 # Created By WROG208 \ N4ASS
 # www.lonewolfsystem.org
 # Files being copied to the Pi. backup_to_usb.sh backup_config.conf and setting permissions for the files as well as adding a CRON job for the script  # to run every week.
@@ -15,6 +15,7 @@ LOG_DIR="/backup/logs"
 HOSTNAME=$(hostname)
 USB_DEVICE="/dev/sda1"
 USB_MOUNT_POINT="/mnt/usb"
+MARKER_FILE="$TARGET_DIR/.backup_installed"
 
 
 if [ "$(id -u)" -ne 0 ]; then
@@ -69,24 +70,29 @@ if ! mount | grep -q "$USB_MOUNT_POINT"; then
 fi
 
 
-LATEST_BACKUP=$(ls -t "$USB_MOUNT_POINT"/*_backup_*.zip 2>/dev/null | head -n 1)
-if [ -n "$LATEST_BACKUP" ]; then
-    echo "Backup found on USB drive: $LATEST_BACKUP"
-    read -p "Do you want to restore from this backup? (y/n): " confirm
-    if [[ "$confirm" =~ ^[Yy]$ ]]; then
-        echo "Restoring from $LATEST_BACKUP..."
-        unzip -o "$LATEST_BACKUP" -d /
-        if [ $? -eq 0 ]; then
-            echo "Restore successful."
+if [ ! -f "$MARKER_FILE" ]; then
+    echo "First run detected. Skipping restore prompt."
+else
+
+    LATEST_BACKUP=$(ls -t "$USB_MOUNT_POINT"/*_backup_*.zip 2>/dev/null | head -n 1)
+    if [ -n "$LATEST_BACKUP" ]; then
+        echo "Backup found on USB drive: $LATEST_BACKUP"
+        read -p "Do you want to restore from this backup? (y/n): " confirm
+        if [[ "$confirm" =~ ^[Yy]$ ]]; then
+            echo "Restoring from $LATEST_BACKUP..."
+            unzip -o "$LATEST_BACKUP" -d /
+            if [ $? -eq 0 ]; then
+                echo "Restore successful."
+            else
+                echo "Restore failed."
+                exit 1
+            fi
         else
-            echo "Restore failed."
-            exit 1
+            echo "Restore skipped by user."
         fi
     else
-        echo "Restore skipped by user."
+        echo "No backup file found on USB."
     fi
-else
-    echo "No backup file found on USB."
 fi
 
 
@@ -98,5 +104,27 @@ if ! crontab -l | grep -qF "$CRON_JOB"; then
 else
     echo "Cron job already exists. Skipping setup."
 fi
+
+
+echo "Creating marker file to indicate first run complete."
+touch "$MARKER_FILE"
+
+
+run_initial_backup() {
+    echo "Running first-time backup to USB drive..."
+    if mount | grep -q "$USB_MOUNT_POINT"; then
+        "$TARGET_DIR/backup_to_usb.sh" backup
+        if [ $? -eq 0 ]; then
+            echo "Initial backup completed successfully."
+        else
+            echo "Initial backup failed."
+        fi
+    else
+        echo "USB drive not mounted. Unable to perform the initial backup."
+    fi
+}
+
+
+run_initial_backup
 
 echo "Installation complete! The backup environment is now ready on this Pi. And backed up on the USB thumb drive"
