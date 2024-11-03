@@ -10,10 +10,9 @@
 
 ### Step 1: Clone the Repository
 
-Open a terminal on your Raspberry Pi and run the following command to clone the repository to your `/tmp` directory:
+Open a terminal on your Raspberry Pi and run the following command to clone the repository it will save it to `/tmp/PiBackupSystem` creating the PiBackupSystem directory:
 
 ```bash
-cd /tmp
 git clone https://github.com/WROG208/PiBackupSystem.git /tmp/PiBackupSystem
 ```
 
