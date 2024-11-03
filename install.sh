@@ -51,10 +51,11 @@ mkdir -p "$LOG_DIR"
 echo "Copying files..."
 cp backup_to_usb.sh "$TARGET_DIR/"
 cp backup_config.conf "$CONFIG_DIR/"
-
+cp restore_from_usb.sh "$TARGET_DIR/"
 
 echo "Setting permissions..."
 chmod +x "$TARGET_DIR/backup_to_usb.sh"
+chmod +x "$TARGET_DIR/restore_from_usb.sh"
 chmod 644 "$CONFIG_DIR/backup_config.conf"
 
 
@@ -128,3 +129,4 @@ run_initial_backup() {
 run_initial_backup
 
 echo "Installation complete! The backup environment is now ready on this Pi. And backed up on the USB thumb drive"
+
