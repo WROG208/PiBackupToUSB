@@ -14,28 +14,47 @@ Open a terminal on your Raspberry Pi and run the following command to clone the 
 
 ```bash
 cd /tmp
-git clone https://github.com/yourusername/PiBackupSystem.git
+git clone https://github.com/WROG208/PiBackupSystem.git /tmp/PiBackupSystem
 ```
 
 ### Step 2: Navigate to the Repository Directory
 Once cloned, navigate into the repository directory:
 
 ```bash
-cd PiBackupSystem
+cd /tmp/PiBackupSystem
 ```
 
 
-### Step 3: Run the Install Script
+### Step 3: Set the executable permission for install.sh:
 
-Run the install.sh The sh script is used with sudo to set up the system. This script will copy files to the appropriate directories, set permissions, and configure the environment.
+```bash
+sudo chmod +x install.sh
+```
+
+
+### Step 4: Run the install.sh. This script will copy files to the appropriate directories, set permissions, and configure the environment.
 
 ```bash
 sudo ./install.sh
 ```
 
-### Step 4: Verify the Installation
+### Step 5: Verify the Installation
 
 After the script completes, you can verify that the setup was successful by checking for any log messages or verifying the cron job (if one was set up).
+
+```bash
+crontab -e
+```
+Look for this line. If the line is there then the crontab has been set. (This is the crontab for updates not the cron tab for the weekly backup.
+
+```cron
+0 0 1-7 * 2 /usr/local/bin/update_scripts.sh
+```
+### The crontab for the weekly backup should look like this:
+
+```cron
+30 0 * * 5 /usr/local/bin/backup_to_usb.sh backup
+```
 
 
 ### Updating the Project
