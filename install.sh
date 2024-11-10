@@ -4,7 +4,7 @@
 # Install and Restore Script for Backup to USB drive on Raspberry Pi
 # This script installs essential files and dependencies, mounts and formats the USB drive if necessary, 
 # and runs the initial backup after installation.
-# 11/03/2024
+# 11/10/2024
 # Created By WROG208 \ N4ASS
 # www.lonewolfsystem.org
 
