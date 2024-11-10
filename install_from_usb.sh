@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install from USB script for Backup System on Raspberry Pi
-# 11/03/2024
+# 11/10/2024
 # Created by WROG208 \ N4ASS
 # www.lonewolfsystem.org
 #
