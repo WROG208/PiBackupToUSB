@@ -80,6 +80,7 @@ If a previous backup exists, `install.sh` will prompt to restore it during setup
 Run `restore_from_usb.sh` to manually restore the most recent backup:
 ```bash
 sudo /usr/local/bin/restore_from_usb.sh
+```
 
 ### If you like to add more files or folders to the backup you will have to modify the backup_config.conf.
 
