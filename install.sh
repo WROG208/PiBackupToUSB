@@ -16,7 +16,6 @@ USB_DEVICE="/dev/sda1"
 USB_MOUNT_POINT="/mnt/usb"
 MARKER_FILE="$TARGET_DIR/.backup_installed"
 
-# Ensure the script is run as root
 if [ "$(id -u)" -ne 0 ]; then
     echo "Please run this script as root (e.g., with sudo)."
     exit 1
@@ -33,7 +32,6 @@ if ! command -v mkfs.vfat &> /dev/null; then
     pacman -Sy --noconfirm dosfstools
 fi
 
-# Convert files to Unix (LF) line endings
 convert_to_unix() {
     for file in backup_to_usb.sh backup_config.conf; do
         if file "$file" | grep -q "CRLF"; then
@@ -55,26 +53,22 @@ echo "Setting permissions..."
 chmod +x "$TARGET_DIR/backup_to_usb.sh"
 chmod 644 "$CONFIG_DIR/backup_config.conf"
 
-# Create USB mount point if it doesn't exist
 if [ ! -d "$USB_MOUNT_POINT" ]; then
     echo "Creating USB mount point at $USB_MOUNT_POINT..."
     mkdir -p "$USB_MOUNT_POINT"
 fi
 
-# Check if the USB device has a valid filesystem
 if ! mount | grep -q "$USB_MOUNT_POINT"; then
     echo "Attempting to mount USB drive at $USB_MOUNT_POINT..."
     mount "$USB_DEVICE" "$USB_MOUNT_POINT" || {
         echo "Failed to mount USB drive. Checking filesystem type..."
         
-        # Prompt user to format the drive if mount failed
         read -p "USB drive at $USB_DEVICE will be formatted to VFAT. All data will be lost. Proceed? (y/n): " confirm_format
         if [[ "$confirm_format" =~ ^[Yy]$ ]]; then
             echo "Formatting USB drive to VFAT..."
             mkfs.vfat "$USB_DEVICE"
             echo "USB drive formatted successfully."
             
-            # Retry mounting after formatting
             mount "$USB_DEVICE" "$USB_MOUNT_POINT" || {
                 echo "Failed to mount USB drive after formatting. Please check the device and try again."
                 exit 1
@@ -86,7 +80,6 @@ if ! mount | grep -q "$USB_MOUNT_POINT"; then
     }
 fi
 
-# Skip restore on first run
 if [ ! -f "$MARKER_FILE" ]; then
     echo "First run detected. Skipping restore prompt."
 else
@@ -111,7 +104,6 @@ else
     fi
 fi
 
-# Set up cron job for weekly backups
 CRON_JOB="30 0 * * 5 $TARGET_DIR/backup_to_usb.sh backup"
 if ! crontab -l | grep -qF "$CRON_JOB"; then
     echo "Setting up a cron job for weekly backups..."
@@ -124,7 +116,6 @@ fi
 echo "Creating marker file to indicate first run complete."
 touch "$MARKER_FILE"
 
-# Run initial backup
 run_initial_backup() {
     echo "Running first-time backup to USB drive..."
     if mount | grep -q "$USB_MOUNT_POINT"; then
