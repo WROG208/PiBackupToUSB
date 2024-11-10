@@ -1,4 +1,5 @@
 # Pi Backup System
+# *** Not Tested in ASL3 ***
 
 ## Overview
 This backup system for Raspberry Pi automates backups to a USB thumb drive. It includes scripts for backing up essential files, restoring backups, and setting up the environment for both new installations and recovery from SD card failures.
