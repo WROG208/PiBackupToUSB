@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup/Restore Script to USB thumb drive
-# 11/03/2024
+# 11/10/2024
 # Created By WROG208 \ N4ASS
 # www.lonewolfsystem.org
 
