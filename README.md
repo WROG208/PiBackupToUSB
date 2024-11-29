@@ -1,90 +1,92 @@
-# PiBackupSystem
+# Pi Backup System
+# *** Not Tested in ASL3 ***
 
-## Note: Please insert a USB drive before starting the installation. The script will save a backup of all necessary files to the USB drive as a precaution. In case of a system failure, this backup allows you to restore the files directly to the Pi without needing to reinstall the repository. During the restore process, the files will be copied back to the Pi with the correct permissions set automatically. 
+## Overview
+This backup system for Raspberry Pi automates backups to a USB thumb drive. It includes scripts for backing up essential files, restoring backups, and setting up the environment for both new installations and recovery from SD card failures.
 
-## This is NOT intended for ASL3. It was not tested. So use at your own risk.
+**Created By:** WROG208 / N4ASS  
+**Website:** [www.lonewolfsystem.org](http://www.lonewolfsystem.org)
+
+## Contents
+
+- `backup_to_usb.sh`: Performs backup operations and saves files to the USB drive.
+- `backup_config.conf`: Configuration file specifying directories/files to back up, USB mount point, log directory, and backup retention settings.
+- `restore_from_usb.sh`: Restores the latest backup from the USB drive.
+- `install.sh`: Sets up the backup environment initially by installing dependencies, setting permissions, and configuring cron jobs.
+- `README.md`: This guide.
+
+### After Download 
+
+Unzip file `PiBackupToUSB.zip` to a folder in your computer. 
+Transfer to the Raspberry Pi using WinSCP.
+Save in folder `/tmp`
+Make `install.sh` executable. Just right click on `install.sh` end choose properties. On the boxes where it say permissions click on every box that has an X on the right side of it and click ok. On the bottom you should see Octal:755
+Now open Putty and sign in into the Pi that you just saved the files to. Navigate to the folder typing:
+```
+cd /tmp
+```
+Now type:
+```
+./install.sh
+```
+Wait for installation and check if there was no error message.
  
+  
+### Generated on First Install
 
+- `install_from_usb.sh`: Saved to the USB drive during setup, allowing for recovery directly from the USB in case of SD card failure.
 
-## Installation Steps
+## Requirements
 
-### Step 1: Clone the Repository
+- Raspberry Pi running a compatible Linux distribution (e.g., Raspbian, Hamvoip).
+- A USB drive for storing backups.
+  
+## Initial Setup
 
-Open a terminal on your Raspberry Pi and run the following command to clone the repository it will save it to `/tmp/PiBackupSystem` creating the PiBackupSystem directory:
+1. **Insert the USB Drive**: Insert a USB drive into the Raspberry Pi that will be used for storing backups. USB drive has to be inserted BEFORE YOU RUN install.sh.
+   
+2. **Run `install.sh`**:
+    - Download and place the package files on the Raspberry Pi.
+    - Run `install.sh` as root:
+      ```bash
+      sudo ./install.sh
+      ```
+    - This script installs necessary dependencies (`dos2unix`, `zip`, `unzip`, `dosfstools`), formats the USB drive to `VFAT` if needed, and sets up the initial configuration and permissions.
+    - **Warning**: If the USB drive requires formatting, all data will be erased. The script prompts for confirmation before formatting.
+    
+3. **Automatic Backup Setup**:
+    - The script sets up a cron job to run the backup every Friday at 12:30 AM.
+  
+4. **Initial Backup**:
+    - The script performs an initial backup to the USB drive.
 
+## Configuration
+
+The configuration file `backup_config.conf` defines key settings:
+
+- **Directories and Files to Back Up**: Set in the `backup_sources` variable, a list of directories/files to back up, separated by spaces.
+- **USB Mount Point**: `usb_mount_point` defines where the USB drive is mounted.
+- **Log Directory**: `log_dir` sets the location for storing log files.
+- **Backup Retention**: `retain_backups` sets the number of recent backups to keep on the USB drive (older backups are deleted automatically).
+
+## Restoring Backups
+
+### Automated Restore
+
+If a previous backup exists, `install.sh` will prompt to restore it during setup.
+
+### Manual Restore
+
+Run `restore_from_usb.sh` to manually restore the most recent backup:
 ```bash
-git clone https://WROG208@github.com/PiBackupSystem.git /tmp/PiBackupSystem
+sudo /usr/local/bin/restore_from_usb.sh
 ```
 
-### Step 2: Navigate to the Repository Directory
-Once cloned, navigate into the repository directory:
+### If you like to add more files or folders to the backup you will have to modify the backup_config.conf.
 
-```bash
-cd /tmp/PiBackupSystem
+Find the line that starts with backup_sources=.
+Add the paths to the new files or directories you want to back up, separated by spaces. For example:
 ```
-
-
-### Step 3: Set the executable permission for install.sh:
-
-```bash
-sudo chmod +x install.sh
+backup_sources="/etc/asterisk /srv/http/supermon /var/spool/cron/root /var/log/asterisk/astdb.txt /path/to/another/directory /path/to/another/file"
 ```
-
-
-### Step 4: Run the install.sh. This script will copy files to the appropriate directories, set permissions, and configure the environment.
-
-```bash
-sudo ./install.sh
-```
-
-### Step 5: Verify the Installation
-
-After the script completes, you can verify that the setup was successful by checking for any log messages or verifying the cron job (if one was set up).
-
-```bash
-crontab -e
-```
-Look for this line. If the line is there then the crontab has been set. (This is the crontab for updates not the cron tab for the weekly backup.
-
-```cron
-0 0 1-7 * 2 /usr/local/bin/update_scripts.sh
-```
-### The crontab for the weekly backup should look like this:
-
-```cron
-30 0 * * 5 /usr/local/bin/backup_to_usb.sh backup
-```
-
-
-### Updating the Project
-
-To update the project with the latest changes from GitHub.
-
-### How the Update Process Works
-
-## Checks for Repository:
-   If the repository isn’t cloned locally, it will clone it to /tmp/PiBackupSystem.
-   If the repository is already present, it pulls the latest changes from GitHub.
-
-## Copies Updated Scripts to the System:
-   Copies backup_to_usb.sh, restore_from_usb.sh, and backup_config.conf to /usr/local/bin.
-   Sets the necessary permissions to ensure the scripts can execute and the configuration file is readable.
-
-## Updates USB Backup:
-   If the USB drive is mounted, it copies the updated scripts to the USB drive.
-   If the USB drive isn’t mounted, it skips the USB backup update but completes the update on the Pi.
-
-## Usage Instructions
-Run the update_scripts.sh Script whenever you want to apply the latest changes from the GitHub repository:
-
-```bash
-sudo /path/to/update_scripts.sh
-```
-
-## Automate Updates: 
-Optionally, you can set up a cron job to run update_scripts.sh at regular intervals (e.g., weekly) if you want to automate the update process.
-
-This approach keeps the scripts on both the Pi and the USB drive up to date with the latest repository changes, ensuring that you always have the most recent version.
-
-```bash
 

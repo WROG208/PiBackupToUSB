@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+# Introductory ASCII Art and Pause
 echo "
                         ████████╗██╗  ██╗███████╗            
                         ╚══██╔══╝██║  ██║██╔════╝            
@@ -32,8 +32,8 @@ echo "
                                                              
 "
 
-
-sleep 8
+# Pause for 5 seconds
+sleep 5
 
 
 # Backup/Restore to USB thumb drive Script
@@ -48,12 +48,13 @@ CONFIG_DIR="/usr/local/bin"
 LOG_DIR="/backup/logs"
 HOSTNAME=$(hostname)
 
-
+# Ensure the script is run as root
 if [ "$(id -u)" -ne 0 ]; then
     echo "Please run this script as root (e.g., with sudo)."
     exit 1
 fi
 
+# Inform the user about the installation and prompt for confirmation
 echo "This script will install the following packages and dependencies:"
 echo "1. dos2unix - Ensures files have Unix (LF) line endings."
 echo "2. zip & unzip - For compressing and extracting files."
@@ -72,7 +73,7 @@ if [[ "$user_confirm" != "y" && "$user_confirm" != "Y" ]]; then
     exit 0
 fi
 
-echo "Installing necessary system packages..."
+echo "Installing necessary system packages silently..."
 if ! command -v dos2unix &> /dev/null; then
     pacman -Sy --noconfirm dos2unix
 fi
@@ -86,7 +87,7 @@ if ! command -v python &> /dev/null || ! command -v pip &> /dev/null; then
     pacman -Sy --noconfirm python python-pip python-setuptools python-packaging python-pyparsing python-six
 fi
 
-
+# Convert files to Unix (LF) line endings
 convert_to_unix() {
     for file in backup_to_usb.sh backup_config.conf; do
         if file "$file" | grep -q "CRLF"; then
@@ -108,12 +109,12 @@ echo "Setting permissions..."
 chmod +x "$TARGET_DIR/backup_to_usb.sh"
 chmod 644 "$CONFIG_DIR/backup_config.conf"
 
-
-CRON_JOB="00 0 * * 5 $TARGET_DIR/backup_to_usb.sh backup"
+# Set up cron job for weekly backups
+CRON_JOB="30 0 * * 5 $TARGET_DIR/backup_to_usb.sh backup"
 if ! crontab -l | grep -qF "$CRON_JOB"; then
     echo "Setting up a cron job for weekly backups..."
     (crontab -l 2>/dev/null; echo "$CRON_JOB") | crontab -
-    echo "Cron job set to run weekly at 12:00 AM every Friday."
+    echo "Cron job set to run weekly at 12:30 AM every Friday."
 else
     echo "Cron job already exists. Skipping setup."
 fi
